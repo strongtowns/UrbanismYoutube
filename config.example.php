@@ -13,4 +13,6 @@ return [
     'data' => __DIR__ . '/data',
     // Leading zero bits the browser must find before a form is accepted. Each extra bit doubles the work.
     'pow_bits' => 17,
+    // Time zone for the day headings and times on the site.
+    'timezone' => 'UTC',
 ];
