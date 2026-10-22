@@ -6,7 +6,9 @@ Every new video from urbanism YouTube channels about cities, streets, housing an
 Want a channel added? Open an issue or a pull request against `channels.php`.
 
 ## How it works
-`cron.php` runs every 15 minutes. It reads each channel's public YouTube feed (no API key and no yt-dlp), stores new videos in SQLite and posts each one to every confirmed webhook. Shorts are left out. The first read of a channel fills in its recent videos without posting them, so adding a channel never floods anyone's Discord.
+`cron.php` runs every 15 minutes. It reads each channel's public YouTube feed (no API key and no yt-dlp), stores new videos in SQLite and posts each one to every confirmed webhook. Shorts are left out. When YouTube won't serve a channel's feed, which happens every time for some channels, its videos are read from the channel's Videos tab instead. The first read of a channel fills in its recent videos without posting them, so adding a channel never floods anyone's Discord. Each channel's icon is refreshed from its YouTube page once a day.
+
+No video is posted twice. Videos are tracked by ID, so one that's taken down never brings an older video back as new, and a video re-uploaded with the same title as one already posted is skipped.
 
 The site in `public/` shows the videos by day, serves the RSS feed at `feed.php`, and handles webhooks:
 

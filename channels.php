@@ -2,6 +2,7 @@
 // Channels to follow, by YouTube channel ID (UC...) or playlist ID (PL...), with the name shown on the site.
 // A channel ID is in the page source of the channel as <link rel="canonical" href="https://www.youtube.com/channel/UC...">.
 return [
+    'UCTeYrzSQ3YCp3RovGH4y8Ew' => 'Strong Towns',
     'UC0intLFzLaudFG-xAvUEO-A' => 'Not Just Bikes',
     'UCpA8SRNrqDpq3Ad7lOCfCLg' => 'About Here',
     'UCN5CBM1NkqDYAHgS-AbgGHA' => 'Oh The Urbanity!',

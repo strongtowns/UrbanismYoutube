@@ -18,6 +18,7 @@ function db(): PDO {
         CREATE INDEX IF NOT EXISTS videos_published ON videos (published);
         CREATE TABLE IF NOT EXISTS subs (id INTEGER PRIMARY KEY, email TEXT NOT NULL, webhook TEXT NOT NULL UNIQUE, name TEXT, status TEXT NOT NULL DEFAULT 'pending', created INTEGER, confirmed INTEGER);
         CREATE TABLE IF NOT EXISTS tokens (hash TEXT PRIMARY KEY, email TEXT NOT NULL, sub INTEGER, expires INTEGER);
+        CREATE TABLE IF NOT EXISTS channels (id TEXT PRIMARY KEY, icon TEXT, checked INTEGER NOT NULL DEFAULT 0);
         CREATE TABLE IF NOT EXISTS hits (key TEXT NOT NULL, at INTEGER NOT NULL);
         CREATE INDEX IF NOT EXISTS hits_key ON hits (key, at);");
     return $db;
@@ -35,10 +36,10 @@ function http(string $method, string $url, ?array $json = null): array {
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_TIMEOUT => 20,
         CURLOPT_USERAGENT => 'UrbanismYoutube (+https://github.com/strongtowns/UrbanismYoutube)',
+        // YouTube's relative dates ("3 days ago") are read in English
+        CURLOPT_HTTPHEADER => array_merge(['Accept-Language: en'], $json === null ? [] : ['Content-Type: application/json']),
     ]);
-    if ($json !== null) {
-        curl_setopt_array($ch, [CURLOPT_POSTFIELDS => json_encode($json), CURLOPT_HTTPHEADER => ['Content-Type: application/json']]);
-    }
+    if ($json !== null) curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($json));
     $body = curl_exec($ch);
     return [curl_getinfo($ch, CURLINFO_RESPONSE_CODE), (string)$body];
 }
@@ -68,6 +69,13 @@ function feed_url(string $id): string {
     return 'https://www.youtube.com/feeds/videos.xml?' . (str_starts_with($id, 'UC') ? 'channel_id' : 'playlist_id') . '=' . urlencode($id);
 }
 
+// A channel's avatar at 88 pixels, from the og:image on its YouTube page.
+function channel_icon(string $channel_id): ?string {
+    [$code, $body] = http('GET', 'https://www.youtube.com/channel/' . $channel_id);
+    return $code === 200 && preg_match('~<meta property="og:image" content="(https://yt3\.googleusercontent\.com/[\w/-]+)=s\d+[^"]*"~', $body, $m)
+        ? $m[1] . '=s88-c-k-c0x00ffffff-no-rj' : null;
+}
+
 // Videos in a YouTube Atom feed, without Shorts.
 function parse_feed(string $xml): array {
     $feed = @simplexml_load_string($xml);
@@ -78,6 +86,34 @@ function parse_feed(string $xml): array {
         if (preg_match('/^[\w-]{11}$/', $id)) $out[] = ['id' => $id, 'title' => (string)$e->title, 'published' => strtotime((string)$e->published)];
     }
     return $out;
+}
+
+// The 15 newest videos on a channel's Videos tab, for channels whose feed YouTube won't serve. Dates there are
+// relative ("12 minutes ago", "2 months ago"), so they're exact for new videos and rough for older ones.
+function parse_videos_tab(string $html): array {
+    if (!preg_match('~var ytInitialData = (\{.*?\});</script>~s', $html, $m)) return [];
+    $out = [];
+    $walk = function ($n) use (&$walk, &$out) {
+        if (!is_array($n)) return;
+        $l = $n['lockupViewModel'] ?? null;
+        if ($l && ($l['contentType'] ?? '') === 'LOCKUP_CONTENT_TYPE_VIDEO') {
+            $md = $l['metadata']['lockupMetadataViewModel'] ?? [];
+            $ago = '';
+            array_walk_recursive($md, function ($v, $k) use (&$ago) {
+                if ($k === 'accessibilityLabel' && is_string($v) && str_ends_with($v, ' ago')) $ago = $v;
+            });
+            // "Streamed 2 days ago" loses its first word so strtotime can read it
+            $t = strtotime(preg_replace('/^\D+(?=\d)/', '', $ago));
+            $title = (string)($md['title']['content'] ?? '');
+            if ($t && $title !== '' && preg_match('/^[\w-]{11}$/', $l['contentId'] ?? '')) {
+                $out[] = ['id' => $l['contentId'], 'title' => $title, 'published' => $t];
+            }
+            return;
+        }
+        foreach ($n as $c) $walk($c);
+    };
+    $walk(json_decode($m[1], true));
+    return array_slice($out, 0, 15);
 }
 
 function send_mail(string $to, string $subject, string $body): bool {

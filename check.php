@@ -26,6 +26,16 @@ $feed = '<feed xmlns:yt="http://www.youtube.com/xml/schemas/2015" xmlns="http://
 ok(parse_feed($feed) === [['id' => 'abcdefghijk', 'title' => 'A & B', 'published' => strtotime('2026-10-21T16:00:08Z')]], 'feed parses without Shorts');
 ok(parse_feed('not xml') === [], 'bad feed gives nothing');
 
+$lockup = fn($id, $type, $label) => ['lockupViewModel' => ['contentId' => $id, 'contentType' => $type, 'metadata' => ['lockupMetadataViewModel' => [
+    'title' => ['content' => "Video $id"], 'metadata' => ['parts' => [['accessibilityLabel' => '5 thousand views'], ['accessibilityLabel' => $label]]]]]]];
+$tab = '<script>var ytInitialData = ' . json_encode(['items' => [
+    $lockup('abcdefghijk', 'LOCKUP_CONTENT_TYPE_VIDEO', 'Streamed 3 days ago'),
+    $lockup('PLnotavideo', 'LOCKUP_CONTENT_TYPE_PLAYLIST', '1 day ago'),
+]]) . ';</script>';
+$r = parse_videos_tab($tab);
+ok(count($r) === 1 && $r[0]['id'] === 'abcdefghijk' && $r[0]['title'] === 'Video abcdefghijk' && abs($r[0]['published'] - strtotime('-3 days')) < 5,
+    'Videos tab parses videos only, with relative dates');
+
 $t = new_token('a@example.org', 7, 60);
 ok(token($t, true)['sub'] === 7 && token($t, false) === null, 'confirm token does not manage');
 $m = new_token('a@example.org', null, null);

@@ -196,7 +196,7 @@ h2.day { font-size: 24px; margin: 28px 0 12px; }
 h2.day:first-of-type { margin-top: 0; }
 .video { display: flex; gap: 16px; align-items: center; padding: 10px; margin: 0 -10px; border-radius: 12px; text-decoration: none; }
 .video:hover { background: var(--paper); }
-.video img { width: 176px; aspect-ratio: 16/9; object-fit: cover; border-radius: 8px; flex: none; background: var(--line); }
+.video img { width: 176px; height: auto; aspect-ratio: 16/9; object-fit: cover; border-radius: 8px; flex: none; background: var(--line); }
 .video strong { display: block; font-weight: 600; line-height: 1.35; }
 .video small { color: var(--muted); font-size: 14px; }
 @media (max-width: 520px) { .video img { width: 128px; } .video strong { font-size: 15px; } }
@@ -210,11 +210,15 @@ label { display: block; font-weight: 600; font-size: 14px; margin-bottom: 12px; 
 input[type=url], input[type=email] { display: block; width: 100%; margin-top: 4px; padding: 10px 12px; font: 15px Inter, system-ui, sans-serif; border: 1px solid #c9c2b6; border-radius: 8px; background: #fff; }
 input:focus { outline: 2px solid var(--orange); outline-offset: 1px; border-color: transparent; }
 .hp { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
-.channels { list-style: none; margin: 0; padding: 0; font-size: 15px; columns: 2; column-gap: 16px; }
-@media (max-width: 860px) { .channels { columns: 3 180px; } }
-.channels li { break-inside: avoid; padding: 2px 0; }
-.channels a { text-decoration: none; }
-.channels a:hover { color: var(--orange-dark); text-decoration: underline; }
+.channels { list-style: none; margin: 0 -8px; padding: 0; display: grid; gap: 2px; }
+@media (max-width: 860px) { .channels { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); } }
+.channels a { display: flex; align-items: center; gap: 12px; padding: 7px 8px; border-radius: 10px; text-decoration: none; }
+.channels a:hover { background: var(--cream); }
+.channels a:hover strong { color: var(--orange-dark); }
+.channels img, .channels .initial { width: 40px; height: 40px; border-radius: 50%; flex: none; object-fit: cover; background: var(--line); }
+.channels .initial { display: grid; place-items: center; background: var(--navy); color: #fff; font-weight: 600; }
+.channels strong { display: block; font-weight: 600; font-size: 15px; line-height: 1.3; }
+.channels small { display: block; color: var(--muted); font-size: 13px; }
 .single { max-width: 640px; padding-top: 40px; padding-bottom: 64px; }
 .hook { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 14px 0; border-top: 1px solid var(--line); }
 .hook small { display: block; color: var(--muted); word-break: break-all; }
@@ -348,8 +352,15 @@ input:focus { outline: 2px solid var(--orange); outline-offset: 1px; border-colo
     <div class="panel">
       <h2>Channels</h2>
       <ul class="channels">
-        <?php foreach ($channels as $id => $name): ?>
-        <li><a href="https://www.youtube.com/<?= str_starts_with($id, 'UC') ? 'channel/' : 'playlist?list=' ?><?= h($id) ?>"><?= h($name) ?></a></li>
+        <?php
+        $icons = db()->query('SELECT id, icon FROM channels')->fetchAll(PDO::FETCH_KEY_PAIR);
+        $latest = db()->query('SELECT channel, MAX(published) FROM videos GROUP BY channel')->fetchAll(PDO::FETCH_KEY_PAIR);
+        foreach ($channels as $id => $name): ?>
+        <li><a href="https://www.youtube.com/<?= str_starts_with($id, 'UC') ? 'channel/' : 'playlist?list=' ?><?= h($id) ?>">
+          <?php if (!empty($icons[$id])): ?><img src="<?= h($icons[$id]) ?>" alt="" loading="lazy" width="40" height="40">
+          <?php else: ?><span class="initial" aria-hidden="true"><?= h(mb_substr($name, 0, 1)) ?></span><?php endif ?>
+          <span><strong><?= h($name) ?></strong><?php if (isset($latest[$id])): ?><small>Latest <?= date('M j, Y', $latest[$id]) ?></small><?php endif ?></span>
+        </a></li>
         <?php endforeach ?>
       </ul>
     </div>
