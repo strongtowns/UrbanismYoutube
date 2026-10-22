@@ -16,13 +16,13 @@ Links in emails are random tokens, and only their SHA-256 hash is stored. Visito
 ## Setup
 Needs PHP 8.1 or later with the curl, pdo_sqlite, simplexml and mbstring extensions, a working `mail()` (sendmail or postfix), and cron.
 
-1. Clone the repository outside the web root and point the web server at `public/` only. `lib.php`, `config.php`, `cron.php` and the database must not be reachable from the web.
+1. Clone the repository into the site's folder, for example `/var/www/example.org/urbanismyoutube`, and serve only its `public/` folder. `lib.php`, `config.php`, `cron.php` and the database must not be reachable from the web, so hide the folder from the rest of the site as in the Caddy example below.
 2. Copy `config.example.php` to `config.php` and fill it in. Generate the secret with `php -r 'echo bin2hex(random_bytes(32));'`.
 3. Create the data folder and make it writable by the user PHP runs as, for example `mkdir data && sudo chown www-data data`.
 4. Run `php check.php` to test the code, then run `cron.php` once as the web server user to fill in the videos: `sudo -u www-data php cron.php`.
 5. Add the cron job as the same user, for example in `/etc/cron.d/urbanismyoutube`:
 ```
-*/15 * * * * www-data php /var/www/urbanismyoutube/cron.php >> /var/www/urbanismyoutube/data/cron.log 2>&1
+*/15 * * * * www-data php /var/www/example.org/urbanismyoutube/cron.php >> /var/www/example.org/urbanismyoutube/data/cron.log 2>&1
 ```
 
 To serve it from a subfolder with Caddy:
@@ -30,9 +30,15 @@ To serve it from a subfolder with Caddy:
 example.org {
     redir /urbanismyoutube /urbanismyoutube/
     handle_path /urbanismyoutube/* {
-        root * /var/www/urbanismyoutube/public
+        root * /var/www/example.org/urbanismyoutube/public
         php_fastcgi unix//run/php/php8.4-fpm.sock
         file_server
+    }
+    handle {
+        root * /var/www/example.org
+        file_server {
+            hide /var/www/example.org/urbanismyoutube
+        }
     }
 }
 ```

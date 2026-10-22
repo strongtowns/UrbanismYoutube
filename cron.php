@@ -12,6 +12,8 @@ $add = $db->prepare('INSERT INTO videos (id, channel, name, title, published, no
     ON CONFLICT (id) DO UPDATE SET title = excluded.title');
 foreach (require __DIR__ . '/channels.php' as $channel => $name) {
     [$code, $body] = http('GET', feed_url($channel));
+    // YouTube's feeds answer 404 now and then for channels that exist, so each gets a second try
+    if ($code !== 200) [$code, $body] = http('GET', feed_url($channel));
     $videos = $code === 200 ? parse_feed($body) : [];
     if (!$videos) { echo date('c') . " $name: HTTP $code, no videos\n"; continue; }
     $seen->execute([$channel]);
