@@ -143,7 +143,7 @@ $token_view = $pending || $manage;
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Urbanism YouTube | New videos about cities, streets and transit</title>
+<title>Urbanism YouTube | STCD</title>
 <meta name="description" content="Every new video from <?= count($channels) ?> urbanism YouTube channels, newest first, with an RSS feed and Discord notifications.">
 <?php if ($token_view): ?><meta name="robots" content="noindex"><?php endif ?>
 <meta name="theme-color" content="#0c2340">
@@ -157,14 +157,28 @@ $token_view = $pending || $manage;
 body { margin: 0; background: var(--cream); color: var(--ink); font: 16px/1.55 Inter, system-ui, sans-serif; }
 a { color: inherit; }
 h1, h2, h3 { font-family: "DM Serif Display", Georgia, serif; font-weight: 400; line-height: 1.15; margin: 0; }
-.wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
-header.top { background: var(--navy); color: #fff; }
-header.top .wrap { display: flex; align-items: center; gap: 18px; height: 60px; }
-.brand { font-weight: 600; text-decoration: none; }
-header nav { margin-left: auto; display: flex; gap: 18px; font-size: 15px; }
-header nav a { text-decoration: none; opacity: .85; }
-header nav a:hover { opacity: 1; color: var(--orange); }
-.hero { background: var(--navy); color: #fff; padding: 40px 0 48px; }
+/* Header and footer are the same as the rest of strongtowns.dev */
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+header.top { background: var(--navy); color: #fff; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid rgba(255,255,255,.08); }
+header.top .wrap { display: flex; align-items: center; gap: 14px; height: 64px; }
+.brand { display: flex; align-items: center; gap: 12px; text-decoration: none; font-weight: 600; letter-spacing: .01em; min-width: 0; }
+.brand img { width: 40px; height: 40px; border-radius: 8px; }
+.brand span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+nav.links { margin-left: auto; display: flex; align-items: center; gap: 20px; }
+nav.links a { text-decoration: none; opacity: .85; font-size: 15px; }
+nav.links a:hover { opacity: 1; color: var(--orange); }
+nav.links .gh svg { width: 24px; height: 24px; fill: currentColor; display: block; }
+@media (max-width: 640px) { .brand span.long { display: none; } nav.links .hide-sm { display: none; } }
+@media (min-width: 641px) { .brand span.short { display: none; } }
+footer { background: var(--navy); color: #c9d4e3; padding: 40px 0; font-size: 14px; }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 16px 32px; align-items: center; justify-content: space-between; }
+footer .brand img { width: 34px; height: 34px; }
+footer p { margin: 0; max-width: 46em; }
+footer a { color: #fff; }
+.hero { background: var(--navy); color: #fff; padding: 40px 0 48px; border-top: 1px solid rgba(255,255,255,.06); }
+.crumb { color: var(--orange); font-weight: 600; letter-spacing: .12em; text-transform: uppercase; font-size: 13px; margin: 0 0 14px; }
+.crumb a { text-decoration: none; }
+.crumb a:hover { text-decoration: underline; }
 .hero h1 { font-size: clamp(34px, 5.5vw, 54px); max-width: 15em; }
 .hero h1 em { font-style: normal; color: var(--orange); }
 .hero p { color: #c9d4e3; font-size: 18px; max-width: 36em; margin: 14px 0 24px; }
@@ -188,7 +202,7 @@ h2.day:first-of-type { margin-top: 0; }
 @media (max-width: 520px) { .video img { width: 128px; } .video strong { font-size: 15px; } }
 .pager { display: flex; justify-content: space-between; margin-top: 28px; }
 .pager a { color: var(--orange-dark); font-weight: 600; text-decoration: none; }
-.panel { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; margin-bottom: 20px; scroll-margin-top: 16px; }
+.panel { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; margin-bottom: 20px; scroll-margin-top: 84px; }
 .panel h2 { font-size: 26px; margin-bottom: 8px; }
 .panel p { margin: 0 0 14px; color: #3a4554; font-size: 15px; }
 .panel ol { margin: 0 0 16px; padding-left: 20px; font-size: 15px; color: #3a4554; }
@@ -205,14 +219,27 @@ input:focus { outline: 2px solid var(--orange); outline-offset: 1px; border-colo
 .hook { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 14px 0; border-top: 1px solid var(--line); }
 .hook small { display: block; color: var(--muted); word-break: break-all; }
 .textbtn { background: none; border: 0; color: var(--orange-dark); font: 600 15px Inter, system-ui, sans-serif; cursor: pointer; padding: 0; }
-footer { border-top: 1px solid var(--line); padding: 24px 0 40px; color: var(--muted); font-size: 14px; }
 </style>
 </head>
 <body>
-<header class="top"><div class="wrap">
-  <a class="brand" href="./">Urbanism YouTube</a>
-  <nav><a href="feed.php">RSS</a><a href="./#discord">Discord</a><a href="https://github.com/strongtowns/UrbanismYoutube">GitHub</a></nav>
-</div></header>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="../">
+      <img src="../logo.svg" alt="STCD logo">
+      <span class="long">Strong Towns Community Developers &amp; Designers</span>
+      <span class="short">STCD</span>
+    </a>
+    <nav class="links">
+      <a href="../#projects" class="hide-sm">Projects</a>
+      <a href="../#members" class="hide-sm">Members</a>
+      <a href="../#contact" class="hide-sm">Get in touch</a>
+      <a href="https://discord.gg/r6erzTuEmn">Discord</a>
+      <a class="gh" href="https://github.com/strongtowns/UrbanismYoutube" aria-label="Urbanism YouTube on GitHub">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      </a>
+    </nav>
+  </div>
+</header>
 
 <?php if ($token_view): ?>
 <main class="wrap single">
@@ -261,6 +288,7 @@ footer { border-top: 1px solid var(--line); padding: 24px 0 40px; color: var(--m
 
 <?php else: ?>
 <section class="hero"><div class="wrap">
+  <p class="crumb"><a href="../#projects">Projects</a> / Urbanism YouTube</p>
   <h1>New <em>urbanism</em> videos, as they go up</h1>
   <p>Every upload from <?= count($channels) ?> YouTube channels about cities, streets, housing and transit, newest first. Follow along by RSS, or have each new video posted to your Discord server.</p>
   <div class="cta"><a class="btn primary" href="#discord">Post to my Discord</a><a class="btn ghost" href="feed.php">RSS feed</a></div>
@@ -329,9 +357,12 @@ footer { border-top: 1px solid var(--line); padding: 24px 0 40px; color: var(--m
 </main>
 <?php endif ?>
 
-<footer><div class="wrap">
-  Checked every 15 minutes. Videos belong to their creators. Part of <a href="https://strongtowns.dev">STCD</a>, open source on <a href="https://github.com/strongtowns/UrbanismYoutube">GitHub</a>.
-</div></footer>
+<footer>
+  <div class="wrap">
+    <a class="brand" href="../"><img src="../logo.svg" alt=""><span>&copy; STCD</span></a>
+    <p>Urbanism YouTube checks for new videos every 15 minutes, and the videos belong to their creators. Its code is open source <a href="https://github.com/strongtowns/UrbanismYoutube">on GitHub</a>. STCD is an independent community project. It is not affiliated with or endorsed by Strong Towns.</p>
+  </div>
+</footer>
 
 <script>
 // Each form carries a signed challenge. Work on it starts as soon as the form is touched, so it's
