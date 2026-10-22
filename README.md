@@ -1,5 +1,9 @@
 # Urbanism YouTube
-A small PHP site that lists every new video from a set of urbanism YouTube channels, newest first, with an RSS feed. Anyone can have each new video posted to their own Discord channel by submitting a webhook and confirming it by email. It runs at https://strongtowns.dev/urbanismyoutube/.
+**https://strongtowns.dev/urbanismyoutube/**
+
+Every new video from urbanism YouTube channels about cities, streets, housing and transit, in one list, newest first. Follow it by RSS at https://strongtowns.dev/urbanismyoutube/feed.php, or have each new video posted to your group's Discord server by pasting a webhook on the page and confirming it by email. There's nothing to install.
+
+Want a channel added? Open an issue or a pull request against `channels.php`.
 
 ## How it works
 `cron.php` runs every 15 minutes. It reads each channel's public YouTube feed (no API key and no yt-dlp), stores new videos in SQLite and posts each one to every confirmed webhook. Shorts are left out. The first read of a channel fills in its recent videos without posting them, so adding a channel never floods anyone's Discord.
@@ -13,7 +17,9 @@ The site in `public/` shows the videos by day, serves the RSS feed at `feed.php`
 
 Links in emails are random tokens, and only their SHA-256 hash is stored. Visitor IP addresses are stored only as a keyed hash, for the rate limit, and cleared after a day.
 
-## Setup
+## Running your own copy
+The page is open source, so a group that wants its own channel list can run a copy.
+
 Needs PHP 8.1 or later with the curl, pdo_sqlite, simplexml and mbstring extensions, a working `mail()` (sendmail or postfix), and cron.
 
 1. Clone the repository into the site's folder, for example `/var/www/example.org/urbanismyoutube`, and serve only its `public/` folder. `lib.php`, `config.php`, `cron.php` and the database must not be reachable from the web, so hide the folder from the rest of the site as in the Caddy example below.

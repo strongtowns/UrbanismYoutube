@@ -18,6 +18,4 @@ return [
     'UCw0bHK75bTCArRBWNYUzUww' => 'Studio Leonardo',
     'UCDcdv91SdfM0GnVqfBtl8CA' => 'Yet Another Urbanist',
     'UCi32RWDTwwP4ZN-UZ-HwXSw' => 'Eryngo Urbanism',
-    'UCYVedJFv4cM2zWrxx7dSDZQ' => 'Vision Zero Vancouver',
-    'UCryPtoJa87DOmu4fpGGqUTg' => 'MovementYVR',
 ];
