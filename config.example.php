@@ -12,5 +12,5 @@ return [
     // Folder for the SQLite database and cron lock, outside the web root and writable by PHP and cron.
     'data' => __DIR__ . '/data',
     // Leading zero bits the browser must find before a form is accepted. Each extra bit doubles the work.
-    'pow_bits' => 18,
+    'pow_bits' => 17,
 ];
